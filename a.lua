@@ -41,23 +41,14 @@ end
 
 -- Grab amount from frames and fire Drop
 local function dropAll()
-	-- Frame2 through Frame5
-	for i = 1, 5 do
-		local path = gui.Backpack.Frame.Frame:FindFirstChild("Frame"..i)
-		if path and path:FindFirstChild("CurrentItem") and path.CurrentItem:FindFirstChild("Amount") then
-			local amt = path.CurrentItem.Amount.Value
-			Drop:FireServer(amt)
-		end
-	end
-
-	-- FrameBackpack1 through 5
-	for i = 1, 5 do
-		local path = gui.Backpack.Frame.Frame:FindFirstChild("FrameBackpack"..i)
-		if path and path:FindFirstChild("CurrentItem") and path.CurrentItem:FindFirstChild("Amount") then
-			local amt = path.CurrentItem.Amount.Value
-			Drop:FireServer(amt)
-		end
-	end
+    -- Only drop from FrameBackpack1 through 5
+    for i = 1, 5 do
+        local path = gui.Backpack.Frame.Frame:FindFirstChild("FrameBackpack"..i)
+        if path and path:FindFirstChild("CurrentItem") and path.CurrentItem:FindFirstChild("Amount") then
+            local amt = path.CurrentItem.Amount.Value
+            Drop:FireServer(amt)
+        end
+    end
 end
 
 -- Main loop
