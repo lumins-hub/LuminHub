@@ -5,7 +5,6 @@ local player = Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
 local hrp = char:WaitForChild("HumanoidRootPart")
 local gui = player:WaitForChild("PlayerGui")
-local RunService = game:GetService("RunService")
 
 local Drop = gui:WaitForChild("Backpack"):WaitForChild("Frame"):WaitForChild("Frame"):WaitForChild("Frame2"):WaitForChild("Script"):WaitForChild("Drop")
 
@@ -24,13 +23,13 @@ local function teleport(pos)
 	hrp.CFrame = CFrame.new(pos)
 end
 
--- Loop through vases with active prompts
+-- Loot vases by teleporting above their world pivot and firing proximity prompt
 local function lootVases()
 	local teleports = 0
 	for _, vase in pairs(workspace:WaitForChild("Vases"):GetChildren()) do
 		local prompt = vase:FindFirstChildWhichIsA("ProximityPrompt", true)
 		if prompt and prompt.Enabled then
-			hrp.CFrame = vase:GetPivot() * CFrame.new(0, 3, 0)
+			hrp.CFrame = vase:GetPivot() * CFrame.new(0, 3, 0) -- hover above world pivot
 			task.wait(0.4)
 			fireproximityprompt(prompt)
 			teleports += 1
@@ -39,23 +38,54 @@ local function lootVases()
 	end
 end
 
--- Grab amount from frames and fire Drop
-local function dropAll()
-    -- Only drop from FrameBackpack1 through 5
-    for i = 1, 5 do
-        local path = gui.Backpack.Frame.Frame:FindFirstChild("FrameBackpack"..i)
-        if path and path:FindFirstChild("CurrentItem") and path.CurrentItem:FindFirstChild("Amount") then
-            local amt = path.CurrentItem.Amount.Value
-            Drop:FireServer(amt)
+-- Get all dropped Rocks and Irons in workspace.DroppedMaterials
+local function getDroppedItems()
+    local droppedFolder = workspace:FindFirstChild("DroppedMaterials")
+    if not droppedFolder then return {} end
+
+    local droppedItems = {}
+    for _, item in pairs(droppedFolder:GetChildren()) do
+        if item.Name == "Rock" or item.Name == "Iron" then
+            table.insert(droppedItems, item)
         end
     end
+    return droppedItems
+end
+
+-- Teleport above dropped Rocks and Irons to loot them
+local function lootDroppedMaterials()
+    local droppedItems = getDroppedItems()
+    for _, item in pairs(droppedItems) do
+        local posCFrame = nil
+        if item.PrimaryPart then
+            posCFrame = item.PrimaryPart.CFrame
+        elseif item:IsA("BasePart") then
+            posCFrame = item.CFrame
+        end
+        if posCFrame then
+            hrp.CFrame = posCFrame * CFrame.new(0, 3, 0)
+            task.wait(0.4)
+            -- Add interaction code here if needed (e.g., fireproximityprompt)
+        end
+    end
+end
+
+-- Drop items from FrameBackpack1 through 5 in GUI
+local function dropAll()
+	for i = 1, 5 do
+		local path = gui.Backpack.Frame.Frame:FindFirstChild("FrameBackpack"..i)
+		if path and path:FindFirstChild("CurrentItem") and path.CurrentItem:FindFirstChild("Amount") then
+			local amt = path.CurrentItem.Amount.Value
+			Drop:FireServer(amt)
+		end
+	end
 end
 
 -- Main loop
 while true do
 	lootVases()
+	lootDroppedMaterials()
 
-	-- If damaged, bail to safe spot
 	if damaged then
 		teleport(targetPos)
 		dropAll()
