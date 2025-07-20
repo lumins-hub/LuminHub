@@ -30,7 +30,7 @@ local function lootVases()
 	for _, vase in pairs(workspace:WaitForChild("Vases"):GetChildren()) do
 		local prompt = vase:FindFirstChildWhichIsA("ProximityPrompt", true)
 		if prompt and prompt.Enabled then
-			hrp.CFrame = vase.CFrame + Vector3.new(0, 3, 0) -- hover above it
+			hrp.CFrame = vase:GetPivot() * CFrame.new(0, 3, 0)
 			task.wait(0.4)
 			fireproximityprompt(prompt)
 			teleports += 1
