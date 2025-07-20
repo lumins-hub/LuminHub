@@ -24,14 +24,16 @@ local function teleport(pos)
 end
 
 -- Loot vases by teleporting above their world pivot and firing proximity prompt
+-- Adds a 0.5s wait before prompt and 1.5s after to allow pickup
 local function lootVases()
 	local teleports = 0
 	for _, vase in pairs(workspace:WaitForChild("Vases"):GetChildren()) do
 		local prompt = vase:FindFirstChildWhichIsA("ProximityPrompt", true)
 		if prompt and prompt.Enabled then
 			hrp.CFrame = vase:GetPivot() * CFrame.new(0, 3, 0) -- hover above world pivot
-			task.wait(0.4)
+			task.wait(0.5)  -- wait before firing prompt
 			fireproximityprompt(prompt)
+			task.wait(1.5)  -- wait longer to pick up drops from vase
 			teleports += 1
 			if teleports >= 8 then break end
 		end
@@ -52,7 +54,7 @@ local function getDroppedItems()
     return droppedItems
 end
 
--- Teleport above dropped Rocks and Irons to loot them
+-- Teleport above dropped Rocks and Irons to loot them with a delay
 local function lootDroppedMaterials()
     local droppedItems = getDroppedItems()
     for _, item in pairs(droppedItems) do
@@ -64,8 +66,7 @@ local function lootDroppedMaterials()
         end
         if posCFrame then
             hrp.CFrame = posCFrame * CFrame.new(0, 3, 0)
-            task.wait(0.4)
-            -- Add interaction code here if needed (e.g., fireproximityprompt)
+            task.wait(0.8)  -- wait to pick up item
         end
     end
 end
