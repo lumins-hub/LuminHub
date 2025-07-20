@@ -1,4 +1,4 @@
--- WARNING: This is NOT for use — it's a developer simulation for anti-exploit analysis only.
+
 
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
